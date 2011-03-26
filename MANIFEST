@@ -1,0 +1,17 @@
+Build.PL
+Changes
+examples/Data-Header-Fields.synopsis
+examples/path/to/email.eml
+lib/Data/Header/Fields.pm
+lib/Data/v.pm
+MANIFEST			This list of files
+t/01_Data-Header-Fields.t
+t/01_Data-v.t
+t/02_Data-Header-Fields-Line.t
+t/02_Data-Header-Fields-Value.t
+t/02_Data-v-Card.t
+t/vcf/aldo.vcf
+t/vcf/enc.vcf
+README
+META.yml
+META.json
