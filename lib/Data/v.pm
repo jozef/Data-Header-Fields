@@ -15,7 +15,7 @@ use Carp;
 use Scalar::Util 'blessed';
 use List::MoreUtils 'any';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'Data::Header::Fields';
 
@@ -182,6 +182,7 @@ use Carp 'croak';
 use MIME::QuotedPrint 'encode_qp', 'decode_qp';
 use MIME::Base64 'encode_base64', 'decode_base64';
 use Encode ();
+use List::MoreUtils 'none';
 
 use overload
 	'""'  => \&as_string,
@@ -217,9 +218,11 @@ sub _decode_key_params {
 	my $key = $self->key;
 	
 	if ($key =~ m/^([^;]+);(.+)$/xms) {
-		my $key_name      = $1;
+		my $orig_key_name  = $1;
 		my @raw_key_params = split /;/, $2;
 		my @key_params;
+		
+		my $key_name = lc $orig_key_name;
 
 		foreach my $key_param (@raw_key_params) {
 			croak 'unknown key param "'.$key_param.'"'
@@ -234,24 +237,35 @@ sub _decode_key_params {
 			;
 		}
 		
-		$self->key($key_name);
+		$self->key($orig_key_name);
 		$self->params(\@key_params);
 		
 		my $enc_type   = lc $self->get_key_param_value('encoding');		
 		if ($enc_type) {
 			if ($enc_type eq 'quoted-printable') {
-				$self->{value} = decode_qp($self->{value});
+				$self->{value} = Data::Header::Fields::Value->new(
+					decode_qp($self->{value})
+				);
 			}
 			elsif ($enc_type eq 'base64') {
-				$self->{value} = decode_base64($self->{value});
+				$self->{value} = Data::Header::Fields::Value->new(
+					decode_base64($self->{value})
+				);
 			}
 			else {
 				croak 'unknown encoding "'.$enc_type.'"';
 			}
 		}
 
-		my $charset = lc $self->get_key_param_value('charset') || 'utf8';
-		$self->{'value'} = eval { Encode::decode($charset, $self->{'value'}) };
+		my $charset = lc $self->get_key_param_value('charset');
+		$charset ||= 'utf8'
+			if (none { $_ eq $key_name } qw(photo logo sound key));
+
+		if ($charset) {
+			$self->{'value'} = Data::Header::Fields::Value->new(
+				eval { Encode::decode($charset, $self->{'value'}) }
+			);
+		}
 	}
 	
 	if ((lc $self->key eq 'n') and (not $self->key->isa('Data::v::Card::Value::Name'))) {

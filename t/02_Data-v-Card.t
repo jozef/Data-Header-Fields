@@ -23,6 +23,12 @@ BEGIN {
 exit main();
 
 sub main {
+	basic();
+	photo();
+	return 0;
+}
+
+sub basic {
 	my $aldo_vcf = IO::Any->slurp([ $Bin, 'vcf', 'aldo.vcf' ]);
 	my $vdata = Data::v->new->decode(\$aldo_vcf);
 	
@@ -46,9 +52,25 @@ sub main {
 		$line->line_changed;
 	}
 	
-	is($enc_vdata->encode(undef, [ '/tmp/enc.vcf' ]), $enc_vcf, 'encode back and compare with original (mixed encoding)');
+	is($enc_vdata->encode(), $enc_vcf, 'encode back and compare with original (mixed encoding)');
 	cmp_ok($enc_vcard->get_value('N'), 'eq', 'aäčšťľžř;aacsztl', 'encoded N (iso-8859-2)');
 	cmp_ok($enc_vcard->get_value('FN'), 'eq', 'aacsztl aäčšťľžř', 'encoded FN (windows-1250)');
+	cmp_ok($enc_vcard->get_value('PHOTO'), 'eq', 'http://www.gravatar.com/avatar/b6e8656226999389e5098d10e00226fe?just-test=ůčšžťľä', 'encoded FN (iso-8859-2)');
 	
-	return 0;
+	TODO: {
+		local $TODO = 'uri-s should be decoded as URI objects';
+		isa_ok($enc_vcard->get_value('PHOTO'), 'URI', 'photo uri as URI object');
+	}
+}
+
+sub photo {
+	my $aldo_vcf = IO::Any->slurp([ $Bin, 'vcf', 'aldo.vcf' ]);
+	my $aldo_img = IO::Any->slurp([ $Bin, 'vcf', 'aldo.jpg' ]);
+
+	my $vdata = Data::v->new->decode(\$aldo_vcf);
+	my $vcard = $vdata->get_value('VCARD');
+	
+	my $photo_bin = $vcard->get_value('photo');
+	IO::Any->spew([ $Bin, 'vcf', 'aldo.jpg-extracted' ], $photo_bin);
+	ok($photo_bin eq $aldo_img, 'extract photo');
 }

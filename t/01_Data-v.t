@@ -69,7 +69,7 @@ sub main {
 	);
 	$vcard_line2->line_changed;
 	is($vcard_line2->get_key_param_value('encoding'), 'QUOTED-PRINTABLE', 'get_key_param_value()');
-	eq_or_diff($vcard_line2->value, "100 Waters Edge\r\nBaytown, LA 30314\r\nUnited States of America", 'QUOTED-PRINTABLE encoded value');
+	eq_or_diff($vcard_line2->value->as_string, "100 Waters Edge\r\nBaytown, LA 30314\r\nUnited States of America", 'QUOTED-PRINTABLE encoded value');
 	is($vcard_line2->as_string, "LABEL;TYPE=WORK;ENCODING=QUOTED-PRINTABLE:100 Waters Edge=0D=0ABaytown, LA 30314=0D=0AUnited States of America\n", 'line->as_string() with encoding');
 	
 	my $vcard_line4 = Data::v::Card::Line->new(
