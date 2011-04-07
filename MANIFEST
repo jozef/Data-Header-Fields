@@ -7,6 +7,7 @@ lib/Data/v.pm
 MANIFEST			This list of files
 META.json
 META.yml
+MYMETA.json
 README
 t/01_Data-Header-Fields.t
 t/01_Data-v.t
@@ -16,3 +17,5 @@ t/02_Data-v-Card.t
 t/vcf/aldo.jpg
 t/vcf/aldo.vcf
 t/vcf/enc.vcf
+t/vcf/michael.jpg
+t/vcf/michael.vcf

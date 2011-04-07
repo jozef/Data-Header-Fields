@@ -15,7 +15,7 @@ use Carp;
 use Scalar::Util 'blessed';
 use List::MoreUtils 'any';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Data::Header::Fields';
 
@@ -61,7 +61,7 @@ sub decode {
 	my $v_type;
 	while (my $line = shift @{$lines}) {
 		if ($line->key eq 'BEGIN') {
-			$v_type = $line->value.'';
+			$v_type = $line->value->as_string;
 			croak 'unknown v-type "'.$v_type.'"'
 				if not $v_types{$v_type};
 			
@@ -76,8 +76,8 @@ sub decode {
 			next;
 		}
 		elsif ($line->key eq 'END') {
-			croak 'BEGIN and END mismatch "'.$v_type.'" ne "'.$line->[1].'"'
-				if $v_type ne $line->value;
+			croak 'BEGIN and END mismatch "'.$v_type.'" ne "'.$line->value->as_string.'"'
+				if $v_type ne $line->value->as_string;
 			
 			$v_type = undef;
 			next;
