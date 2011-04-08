@@ -72,10 +72,10 @@ sub main {
 	cmp_ok($dhf->get_value('t3'), 'eq', 'c999', 'get_value()');
 	ok(!defined $dhf->get_value('qwe'), 'get_value() - unknown');
 	
-	cmp_ok($dhf->set_field('t1' => '\o/')->get_value('t1'), 'eq', '\o/', 'set_field() update');
-	cmp_ok($dhf->set_field('t3' => 'd999')->get_value('t3'), 'eq', 'd999', 'set_field() update');
-	cmp_ok($dhf->set_field('t5' => '0:1:2:3:4:5')->get_value('t5'), 'eq', '0:1:2:3:4:5', 'set_field() new entry with ":"');
-	cmp_ok($dhf->set_field('tx' => 'yyy')->get_value('tx'), 'eq', 'yyy', 'set_field() new entry');
+	cmp_ok($dhf->set_value('t1' => '\o/')->get_value('t1'), 'eq', '\o/', 'set_field() update');
+	cmp_ok($dhf->set_value('t3' => 'd999')->get_value('t3'), 'eq', 'd999', 'set_field() update');
+	cmp_ok($dhf->set_value('t5' => '0:1:2:3:4:5')->get_value('t5'), 'eq', '0:1:2:3:4:5', 'set_field() new entry with ":"');
+	cmp_ok($dhf->set_value('tx' => 'yyy')->get_value('tx'), 'eq', 'yyy', 'set_field() new entry');
 
 	eq_or_diff(
 		$dhf->encode(),
@@ -93,7 +93,7 @@ sub main {
 	# escape characters
 	my $dhf_esc = Data::Header::Fields->new();
 	cmp_ok(
-		$dhf_esc->set_field('n' => "1\n2\n3\n")->get_value('n'),
+		$dhf_esc->set_value('n' => "1\n2\n3\n")->get_value('n'),
 		'eq',
 		"1\n2\n3\n",
 		'multiline',

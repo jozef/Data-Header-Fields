@@ -67,18 +67,18 @@ sub photo {
 	my $aldo_vcf = IO::Any->slurp([ $Bin, 'vcf', 'aldo.vcf' ]);
 	my $aldo_img = IO::Any->slurp([ $Bin, 'vcf', 'aldo.jpg' ]);
 
-	my $vdata = Data::v->new->decode(\$aldo_vcf);
-	my $vcard = $vdata->get_value('VCARD');
+	my $a_vdata = Data::v->new->decode(\$aldo_vcf);
+	my $a_vcard = $a_vdata->get_value('VCARD');
 	
-	my $a_photo_bin = $vcard->get_value('photo');
+	my $a_photo_bin = $a_vcard->get_value('photo');
 	ok($a_photo_bin->value eq $aldo_img, 'extract photo');
 
 	my $michael_vcf = IO::Any->slurp([ $Bin, 'vcf', 'michael.vcf' ]);
 	my $michael_img = IO::Any->slurp([ $Bin, 'vcf', 'michael.jpg' ]);
 
-	my $vdata = Data::v->new->decode(\$michael_vcf);
-	my $vcard = $vdata->get_value('VCARD');
+	my $m_vdata = Data::v->new->decode(\$michael_vcf);
+	my $m_vcard = $m_vdata->get_value('VCARD');
 	
-	my $m_photo_bin = $vcard->get_value('photo');
+	my $m_photo_bin = $m_vcard->get_value('photo');
 	ok($m_photo_bin->value eq $michael_img, 'extract photo');
 }

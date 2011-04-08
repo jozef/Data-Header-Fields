@@ -1,5 +1,11 @@
 Revision history for Data-Header-Fields
 
+0.03    08 Apr 2011
+    - s/set_field/set_value/
+    - s/update_fields/update_values/
+    - s/set_field/set_value/
+    - add Data::v::Param
+
 0.02    01 Apr 2011
     - proper decoding of binary fields (photo, logo, sound, key)
     - every line value is an object

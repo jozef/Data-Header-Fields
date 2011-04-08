@@ -4,6 +4,32 @@ package Data::v;
 
 =head1 SYNOPSIS
 
+	use Data::v;
+
+	my $vdata = Data::v->new->decode([ '..', 't', 'vcf', 'aldo.vcf' ]);
+	my $vcard = $vdata->get_value('vcard');
+	
+	print 'version:   ', $vcard->get_value('version'), "\n";
+	print 'full name: ', $vcard->get_value('fn'), "\n";
+	print 'email:     ', $vcard->get_value('email'), "\n";
+	
+	my @phones = $vcard->get_fields('tel');
+	
+	use List::MoreUtils 'any';
+	my @cell_phones =
+		map  { $_->value->as_string }
+		grep { any { lc $_->value eq 'cell' } $_->get_key_params('type') }
+		@phones
+	;
+	print 'cell:      ', join(', ', @cell_phones), "\n";
+	
+	print "\n";
+	
+	$vcard->set_value('email' => 'dada@internet');
+	$vcard->rm_fields('rev', 'photo', 'adr', 'X-MS-OL-DEFAULT-POSTAL-ADDRESS', 'label');
+	
+	print $vdata->encode, "\n";
+
 =head1 DESCRIPTION
 
 =cut
@@ -232,7 +258,7 @@ sub _decode_key_params {
 			
 			push
 				@key_params,
-					map { { ('name' => $param_name, 'value' => $_) } }
+					map { Data::v::Param->new('name' => $param_name, 'value' => $_, 'parent' => $self) }
 					(split(/,/, $param_str))
 			;
 		}
@@ -324,16 +350,17 @@ sub update_key_params {
 		
 		# update existing
 		foreach my $param (@{$self->params}) {
-			$param->{'value'} = shift @new_params    # will returns undefs if depleeted
-				if ($param->{'name'} eq $param_name);
+			$param->value(shift @new_params)    # will returns undefs if depleeted
+				if ($param->name eq $param_name);
 		}
 		
 		# add any additional new
 		foreach my $add_value (@new_params) {
-			push @{$self->{params}}, {
-				'name'  => $param_name,
-				'value' => $add_value,
-			};
+			push @{$self->{params}}, Data::v::Param->new(
+				'parent' => $self,
+				'name'   => $param_name,
+				'value'  => $add_value,
+			);
 		}
 		
 		# remove any additional old
@@ -364,7 +391,7 @@ sub set_key_param {
 		$self->update_key_params($param_name, $param_value);
 	}
 	elsif (@params == 0) {
-		push @{$self->params}, { 'name' => $param_name, 'value' => $param_value };
+		push @{$self->params}, Data::v::Param->new('name' => $param_name, 'value' => $param_value, 'parent' => $self);
 	}
 	else { 
 		croak 'more then one param field with name "'.$param_name.'"';
@@ -379,7 +406,7 @@ sub rm_key_param {
 
 	my @params = (
 		grep {
-			$_->{'name'} ne $param_name
+			$_->name ne $param_name
 		} @{$self->params}
 	);
 	$self->params(\@params);
@@ -415,27 +442,25 @@ sub _encode_key_params {
 			join(
 				';',
 				(
-					map {
-						(lc $_->{'name'} eq 'type')
-						? ($_->{'value'})
-						: $_->{'name'}.'='.$_->{'value'} }
-					grep { defined $_->{'value'} }
+					map  { $_->as_string }
+					grep { defined $_->value }
 					@{$params}
 				),
 			)
 		);
 	}
 	elsif ($self->version ge '3.0') {
-		my @types = map { $_->{'value'} } $self->get_key_params('type');
+		my @types = map { $_->as_string } $self->get_key_params('type');
 		$key .= ';'.(
 			join(
 				';',
 				(
 					map {
-						(lc $_->{'name'} eq 'type')
+						(lc $_->name eq 'type')
 						? ( @types ? ('TYPE='.join(',',splice(@types,0,scalar @types))) : () )
-						: $_->{'name'}.'='.$_->{'value'} }
-					grep { defined $_->{'value'} }
+						: $_->as_string
+					}
+					grep { defined $_->value }
 					@{$params}
 				),
 			)
@@ -719,6 +744,50 @@ sub country {
 	}
 
 	return $self->{'country'};
+}
+
+1;
+
+package Data::v::Param;
+
+use overload
+	'""'  => \&as_string,
+	'cmp' => \&Data::Header::Fields::Value::cmp,
+;
+
+sub new {
+	my $class = shift;
+	return bless {
+		@_
+	}, $class;
+}
+
+sub name {
+	my $self   = shift;	
+
+	$self->{'name'} = shift @_
+		if (@_);
+
+	return $self->{'name'};
+}
+
+sub value {
+	my $self   = shift;	
+
+	$self->{'value'} = shift @_
+		if (@_);
+
+	return $self->{'value'};
+}
+
+sub as_string {
+	my $self   = shift;	
+	
+	return
+		(lc $self->name eq 'type')
+		? $self->value
+		: $self->name.'='.$self->value
+	;
 }
 
 1;

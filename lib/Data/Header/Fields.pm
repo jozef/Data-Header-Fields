@@ -17,7 +17,7 @@ Data::Header::Fields - encode and decode RFC822 header field lines
 	print 'Date    - ', $dhf->get_value('Date'), "\n";
 	print '--- cut ---', "\n";
 
-	$dhf->set_field('To' => ' anyone@anywhere');
+	$dhf->set_value('To' => ' anyone@anywhere');
 	$dhf->rm_fields('Received');
 	
 	print $dhf->encode();
@@ -207,23 +207,23 @@ sub get_field {
 }
 
 sub get_value {
-	my $self       = shift;
-	my $field_name = shift or croak 'field_name argument is mandatory';
+	my $self = shift;
+	my $key  = shift or croak 'key argument is mandatory';
 
-	my $field = $self->get_field($field_name);
+	my $field = $self->get_field($key);
 	return undef if not defined $field;
 	return $field->value;
 }
 
-sub update_fields {
-	my $self       = shift;
-	my $field_name = shift or croak 'field_name argument is mandatory';
-	my $value      = shift;
+sub update_values {
+	my $self  = shift;
+	my $key   = shift or croak 'key argument is mandatory';
+	my $value = shift;
 
 	my $key_cmp = $self->key_cmp;
 	my @lines = (
 		map {
-			($key_cmp->($_->key, $field_name) == 0 ? $_->value($value) : ());
+			($key_cmp->($_->key, $key) == 0 ? $_->value($value) : ());
 			$_;
 		} @{$self->_lines}
 	);
@@ -248,24 +248,24 @@ sub rm_fields {
 	return $self;
 }
 
-sub set_field {
-	my $self       = shift;
-	my $field_name = shift or croak 'field_name argument is mandatory';
-	my $value      = shift;
+sub set_value {
+	my $self  = shift;
+	my $key   = shift or croak 'key argument is mandatory';
+	my $value = shift;
 
-	my @fields = $self->get_fields($field_name);
+	my @fields = $self->get_fields($key);
 	if (@fields == 1) {
-		$self->update_fields($field_name, $value);
+		$self->update_values($key, $value);
 	}
 	elsif (@fields == 0) {
 		push @{$self->_lines}, Data::Header::Fields::Line->new(
-			'key' => $field_name,
+			'key' => $key,
 			'value' => $value,
 			'parent' => $self,
 		);
 	}
 	else { 
-		croak 'more then one header field with name "'.$field_name.'"';
+		croak 'more then one header field with name "'.$key.'"';
 	}
 	
 	

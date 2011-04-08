@@ -37,10 +37,17 @@ sub main {
 	is($vcard_line->version, '2.1', 'default vcard version is 2.1');
 	is($vcard_line->key, 'PHOTO', 'line key');
 	cmp_ok($vcard_line->value, 'eq', 'http://www.example.com/dir_photos/my_photo.gif', 'line value');
-	cmp_deeply($vcard_line->params, [{'name' => 'VALUE', 'value' => 'URL'}, {'name' => 'TYPE', 'value' => 'GIF'}], 'key params');
-	cmp_deeply([$vcard_line->get_key_params('type')], [{'name' => 'TYPE', 'value' => 'GIF'}], 'get_key_params()');
+	cmp_deeply([
+		map { {'name'=>$_->name, 'value'=>$_->value} } @{$vcard_line->params}],
+		[{'name' => 'VALUE', 'value' => 'URL'}, {'name' => 'TYPE', 'value' => 'GIF'}],
+		'key params'
+	);
+	cmp_deeply(
+		[ map { {'name'=>$_->name, 'value'=>$_->value} } $vcard_line->get_key_params('type') ],
+		[ {'name' => 'TYPE', 'value' => 'GIF'} ],
+		'get_key_params()',
+	);
 	cmp_deeply($vcard_line->as_string, "PHOTO;VALUE=URL;GIF:http://www.example.com/dir_photos/my_photo.gif\n", 'line->as_string() v2.1');
-
 	my $vcard_line5 = Data::v::Card::Line->new(
 		'line'   => "TEL;WORK;VOICE:(111) 555-1212\n",
 		'parent' => $vcard,
@@ -58,7 +65,7 @@ sub main {
 	$vcard_line5->set_key_param('LANGUAGE' => undef);
 	is($vcard_line5->as_string, "TEL;VOICE:(111) 555-1212\n", 'line->as_string() with voice only now');
 
-	$vcard->set_field('VERSION' => '3.0');
+	$vcard->set_value('VERSION' => '3.0');
 	is($vcard->version, '3.0', 'vcard version now 3.0');
 	is($vcard_line->version, '3.0', 'vcard version now 3.0');
 	cmp_deeply($vcard_line->as_string, "PHOTO;VALUE=URL;TYPE=GIF:http://www.example.com/dir_photos/my_photo.gif\n", 'line->as_string() v3.0');
