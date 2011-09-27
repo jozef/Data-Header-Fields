@@ -13,7 +13,7 @@ SYNOPSIS
             print 'Date    - ', $dhf->get_value('Date'), "\n";
             print '--- cut ---', "\n";
 
-            $dhf->set_field('To' => ' anyone@anywhere');
+            $dhf->set_value('To' => ' anyone@anywhere');
             $dhf->rm_fields('Received');
         
             print $dhf->encode();

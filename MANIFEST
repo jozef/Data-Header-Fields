@@ -1,13 +1,13 @@
 Build.PL
 Changes
 examples/Data-Header-Fields.synopsis
+examples/Data-v.synopsis
 examples/path/to/email.eml
 lib/Data/Header/Fields.pm
 lib/Data/v.pm
 MANIFEST			This list of files
 META.json
 META.yml
-MYMETA.json
 README
 t/01_Data-Header-Fields.t
 t/01_Data-v.t

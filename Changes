@@ -1,6 +1,6 @@
 Revision history for Data-Header-Fields
 
-0.04    ?
+0.04    27 Sep 2011
     - fix memory leaks in ::Line and ::Value
     - Data::v get_fields() with optional param name/value filter
 

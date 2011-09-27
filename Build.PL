@@ -8,6 +8,9 @@ my $builder = Module::Build->new(
     license             => 'perl',
     dist_author         => 'Jozef Kutej <jkutej@cpan.org>',
     dist_version_from   => 'lib/Data/Header/Fields.pm',
+    configure_requires => {
+        'Module::Build' => '0.36',
+    },
     requires => {
         'IO::Any'           => 0,
         'Carp'              => 0,
