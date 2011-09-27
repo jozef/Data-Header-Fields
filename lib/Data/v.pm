@@ -13,13 +13,12 @@ package Data::v;
 	print 'full name: ', $vcard->get_value('fn'), "\n";
 	print 'email:     ', $vcard->get_value('email'), "\n";
 	
-	my @phones = $vcard->get_fields('tel');
+	my @cell_phones = $vcard->get_fields('tel');
 	
 	use List::MoreUtils 'any';
 	my @cell_phones =
-		map  { $_->value->as_string }
-		grep { any { lc $_->value eq 'cell' } $_->get_key_params('type') }
-		@phones
+		map { $_->value->as_string }
+		$vcard->get_fields('tel', 'type' => 'cell')
 	;
 	print 'cell:      ', join(', ', @cell_phones), "\n";
 	
@@ -175,6 +174,9 @@ package Data::v::Card;
 
 use base 'Data::v';
 
+use List::MoreUtils 'any';
+use Carp 'croak';
+
 sub version { return $_[0]->get_value('version') || '2.1'; }
 
 sub rebless_lines {
@@ -195,6 +197,23 @@ sub _default_parent {
 sub line_ending {
 	my $self = shift;
 	return $self->parent->parent->line_ending(@_);
+}
+
+sub get_fields {
+	my $self        = shift;
+	my $field_name  = shift or croak 'field_name argument is mandatory';
+	my $param_name  = shift;
+	my $param_value = shift;
+	
+	my @fields = $self->SUPER::get_fields($field_name);
+	if (defined $param_name) {
+		@fields = 
+			grep { any { lc $_->value eq $param_value } $_->get_key_params($param_name) }
+			@fields
+		;
+	}
+	
+	return @fields;
 }
 
 1;
@@ -266,7 +285,7 @@ sub _decode_key_params {
 		$self->key($orig_key_name);
 		$self->params(\@key_params);
 		
-		my $enc_type   = lc $self->get_key_param_value('encoding');		
+		my $enc_type   = lc ($self->get_key_param_value('encoding') || '');
 		if ($enc_type) {
 			if ($enc_type eq 'quoted-printable') {
 				$self->{value} = Data::Header::Fields::Value->new(
@@ -283,7 +302,7 @@ sub _decode_key_params {
 			}
 		}
 
-		my $charset = lc $self->get_key_param_value('charset');
+		my $charset = lc ($self->get_key_param_value('charset') || '');
 		$charset ||= 'utf8'
 			if (none { $_ eq $key_name } qw(photo logo sound key));
 
@@ -421,10 +440,10 @@ sub _encode_key_params {
 	return if scalar @{$params} == 0;
 	my $key   = $self->key;
 
-	my $charset = lc $self->get_key_param_value('charset') || 'utf8';
+	my $charset = lc ($self->get_key_param_value('charset') || 'utf8');
 	$self->{value} = eval { Encode::encode($charset, $self->{value}) };
 	
-	my $enc_type   = lc $self->get_key_param_value('encoding');		
+	my $enc_type   = lc ($self->get_key_param_value('encoding') || '');
 	if ($enc_type) {
 		if ($enc_type eq 'quoted-printable') {
 			$self->{value} = encode_qp($self->{value}, "");

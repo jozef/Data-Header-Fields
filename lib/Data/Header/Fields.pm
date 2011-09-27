@@ -198,8 +198,9 @@ sub get_fields {
 sub get_field {
 	my $self       = shift;
 	my $field_name = shift or croak 'field_name argument is mandatory';
+	my @extra_args = @_;
 	
-	my @fields = $self->get_fields($field_name);
+	my @fields = $self->get_fields($field_name, @extra_args);
 	croak 'more then one header field with name "'.$field_name.'"'
 		if @fields > 1;
 	
@@ -209,8 +210,9 @@ sub get_field {
 sub get_value {
 	my $self = shift;
 	my $key  = shift or croak 'key argument is mandatory';
+	my @extra_args = @_;
 
-	my $field = $self->get_field($key);
+	my $field = $self->get_field($key, @extra_args);
 	return undef if not defined $field;
 	return $field->value;
 }

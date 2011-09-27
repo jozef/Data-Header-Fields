@@ -45,6 +45,8 @@ sub basic {
 	
 	is($vcard->get_value('ADR')->country, 'Österreich', 'adr->country() in Windows-1252');
 
+	cmp_ok($vcard->get_value('tel', 'type' => 'cell'), 'eq', '+43 (699) 15 991 000', 'get cell phone');
+
 	my $enc_vcf = IO::Any->slurp([ $Bin, 'vcf', 'enc.vcf' ]);
 	my $enc_vdata = Data::v->new->decode(\$enc_vcf);
 	my $enc_vcard = $enc_vdata->get_value('VCARD');
