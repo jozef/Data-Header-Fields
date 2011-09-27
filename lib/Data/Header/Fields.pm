@@ -61,7 +61,7 @@ use overload
 	'cmp' => \&cmp,
 ;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
 	my $class = shift;
@@ -314,6 +314,8 @@ sub line_ending {
 
 package Data::Header::Fields::Value;
 
+use Scalar::Util 'weaken', 'isweak';
+
 use overload
 	'""' => \&as_string,
 	'cmp' => \&cmp,
@@ -332,7 +334,12 @@ sub new {
 		$value = { $value, @_ };
 	}
 	
-	return bless { 'parent' => $class->_default_parent, %{$value} }, $class;
+	my $self = bless { 'parent' => $class->_default_parent, %{$value} }, $class;
+	
+	weaken($self->{'parent'})
+		if (ref($self->{'parent'}) && !isweak($self->{'parent'}));
+	
+	return $self;
 }
 
 sub as_string {
@@ -388,7 +395,7 @@ sub value {
 
 package Data::Header::Fields::Line;
 
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'weaken', 'isweak';
 
 use overload
 	'""' => \&as_string,
@@ -430,6 +437,9 @@ sub new {
 			);
 		}
 	}
+	
+	weaken($line->{'parent'})
+		if (ref($line->{'parent'}) && !isweak($line->{'parent'}));
 	
 	return bless $line, $class;
 }

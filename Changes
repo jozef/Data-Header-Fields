@@ -1,5 +1,8 @@
 Revision history for Data-Header-Fields
 
+0.04    ?
+    - fix memory leaks in ::Line and ::Value
+
 0.03    08 Apr 2011
     - s/set_field/set_value/
     - s/update_fields/update_values/
