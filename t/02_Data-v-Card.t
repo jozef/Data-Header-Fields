@@ -5,8 +5,8 @@ use warnings;
 
 use utf8;
 
-use Test::More 'no_plan';
-#use Test::More tests => 10;
+#use Test::More 'no_plan';
+use Test::More tests => 15;
 use Test::Differences;
 use Test::Exception;
 use Test::Deep;
@@ -58,11 +58,6 @@ sub basic {
 	cmp_ok($enc_vcard->get_value('N'), 'eq', 'aäčšťľžř;aacsztl', 'encoded N (iso-8859-2)');
 	cmp_ok($enc_vcard->get_value('FN'), 'eq', 'aacsztl aäčšťľžř', 'encoded FN (windows-1250)');
 	cmp_ok($enc_vcard->get_value('PHOTO'), 'eq', 'http://www.gravatar.com/avatar/b6e8656226999389e5098d10e00226fe?just-test=ůčšžťľä', 'encoded FN (iso-8859-2)');
-	
-	TODO: {
-		local $TODO = 'uri-s should be decoded as URI objects';
-		isa_ok($enc_vcard->get_value('PHOTO'), 'URI', 'photo uri as URI object');
-	}
 }
 
 sub photo {
