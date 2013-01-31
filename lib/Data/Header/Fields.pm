@@ -13,7 +13,7 @@ use overload
 	'cmp' => \&cmp,
 ;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub new {
 	my $class = shift;
@@ -263,6 +263,15 @@ sub line_ending {
 	return $self->{line_ending};
 }
 
+sub push_line {
+	my $self = shift;
+	my $line = shift;
+
+	my $lines = $self->_lines;
+	push(@$lines, $line);
+
+	return $self;
+}
 
 1;
 
