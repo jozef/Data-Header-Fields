@@ -1,5 +1,8 @@
 Revision history for Data-Header-Fields
 
+0.05    28 May 2015
+    - push_line() to append to the dhf
+
 0.04    27 Sep 2011
     - fix memory leaks in ::Line and ::Value
     - Data::v get_fields() with optional param name/value filter
